@@ -1,0 +1,46 @@
+{
+  "app": "clean-but-broken",
+  "label": "clean scan, real bug",
+  "root": "ShopPage",
+  "ticks": 8,
+  "reorderEvery": 4,
+  "reorderAffects": ["cart"],
+  "listSize": 5,
+  "designNote": "CartBadge keeps its own copy of the cart total in module-level state, synced by hand, while SummaryPanel computes the same total from `cart`. Two sources of truth — the badge can show a stale total. Every checklist item passes; the flaw is a design decision, not a render pattern, so no rule owns it.",
+  "components": {
+    "ShopPage": {
+      "state": ["cart", "tick"],
+      "provides": [
+        { "context": "SessionContext", "value": "memoized" }
+      ],
+      "children": [
+        { "component": "Header", "props": { "onSearch": "stable", "title": "stable" } },
+        { "component": "CartList", "props": { "items": { "kind": "stable", "ref": "cart" } } },
+        { "component": "CartBadge", "props": { "cart": { "kind": "stable", "ref": "cart" } } },
+        { "component": "SummaryPanel", "props": { "cart": { "kind": "stable", "ref": "cart" } } }
+      ]
+    },
+    "Header": {
+      "memo": true,
+      "consumes": ["SessionContext"],
+      "children": []
+    },
+    "CartList": {
+      "memo": true,
+      "list": { "items": "cart", "key": "id", "row": "CartRow", "rowProps": { "item": "stable" } },
+      "children": []
+    },
+    "CartRow": {
+      "memo": true,
+      "children": []
+    },
+    "CartBadge": {
+      "memo": true,
+      "children": []
+    },
+    "SummaryPanel": {
+      "memo": true,
+      "children": []
+    }
+  }
+}

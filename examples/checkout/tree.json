@@ -1,0 +1,46 @@
+{
+  "app": "checkout",
+  "label": "as the agent generated it",
+  "root": "CheckoutPage",
+  "ticks": 8,
+  "reorderEvery": 4,
+  "reorderAffects": ["cart"],
+  "listSize": 5,
+  "designNote": null,
+  "components": {
+    "CheckoutPage": {
+      "state": ["cart", "coupon", "tick"],
+      "effects": [
+        { "id": "sync-total", "deps": ["cart"], "uses": ["cart", "coupon"] }
+      ],
+      "provides": [
+        { "context": "SessionContext", "value": "inline-object" }
+      ],
+      "children": [
+        { "component": "Header", "props": { "onSearch": "inline-fn", "title": "stable" } },
+        { "component": "CartList", "props": { "items": { "kind": "stable", "ref": "cart" }, "options": "inline-object" } },
+        { "component": "SummaryPanel", "props": { "cart": { "kind": "stable", "ref": "cart" } } }
+      ]
+    },
+    "Header": {
+      "memo": true,
+      "consumes": ["SessionContext"],
+      "children": []
+    },
+    "CartList": {
+      "memo": true,
+      "list": { "items": "cart", "key": "index", "row": "CartRow", "rowProps": { "item": "stable" } },
+      "children": []
+    },
+    "CartRow": {
+      "memo": true,
+      "consumes": ["SessionContext"],
+      "children": []
+    },
+    "SummaryPanel": {
+      "memo": true,
+      "derivedState": [{ "name": "total", "from": "cart" }],
+      "children": []
+    }
+  }
+}

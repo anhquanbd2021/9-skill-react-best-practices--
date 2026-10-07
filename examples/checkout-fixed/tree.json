@@ -1,0 +1,45 @@
+{
+  "app": "checkout-fixed",
+  "label": "after the checklist pass",
+  "root": "CheckoutPage",
+  "ticks": 8,
+  "reorderEvery": 4,
+  "reorderAffects": ["cart"],
+  "listSize": 5,
+  "designNote": null,
+  "components": {
+    "CheckoutPage": {
+      "state": ["cart", "coupon", "tick"],
+      "effects": [
+        { "id": "sync-total", "deps": ["cart", "coupon"], "uses": ["cart", "coupon"] }
+      ],
+      "provides": [
+        { "context": "SessionContext", "value": "memoized" }
+      ],
+      "children": [
+        { "component": "Header", "props": { "onSearch": "stable", "title": "stable" } },
+        { "component": "CartList", "props": { "items": { "kind": "stable", "ref": "cart" }, "options": "stable" } },
+        { "component": "SummaryPanel", "props": { "cart": { "kind": "stable", "ref": "cart" } } }
+      ]
+    },
+    "Header": {
+      "memo": true,
+      "consumes": ["SessionContext"],
+      "children": []
+    },
+    "CartList": {
+      "memo": true,
+      "list": { "items": "cart", "key": "id", "row": "CartRow", "rowProps": { "item": "stable" } },
+      "children": []
+    },
+    "CartRow": {
+      "memo": true,
+      "consumes": ["SessionContext"],
+      "children": []
+    },
+    "SummaryPanel": {
+      "memo": true,
+      "children": []
+    }
+  }
+}

@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="How Render Inspector works: the checklist contract, the five rules, the render simulator's model, and the honest limits of a descriptor-based lab.">
+  <title>Guide — Render Inspector</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css">
+<!-- pb-shell --><link rel="stylesheet" href="./pb-shell.css"><!-- pb-shell --><!-- pb-back --><link rel="stylesheet" href="./pb-back.css"><!-- pb-back --></head>
+<body>
+<a class="skip-link" href="#main">Skip to main content</a>
+<main class="guide" id="main">
+  <nav aria-label="Primary"><div class="nav-segment"><a href="/">Lab</a><a aria-current="page" href="/guide.html">Guide</a></div><a class="nav-source" href="https://github.com/anhquanbd2021/9-skill-react-best-practices--">Source</a></nav>
+  <header class="guide-head">
+    <h1>Guide</h1>
+    <p class="lede">What a "React best practices" skill mechanically is, how this lab makes it runnable, and where the model stops being true.</p>
+  </header>
+
+  <h2>The contract: checklist lines activate detectors</h2>
+  <p>A skill file has frontmatter (<code>name</code>, <code>description</code>) and a body. This lab treats the body as a <strong>contract</strong>: each checklist line shaped like <code>- `rule-id`</code> activates the detector of the same id in <code>public/rules.mjs</code>. A skill whose body is prose — like <code>examples/react-101/SKILL.md</code> ("Helps with React.") — parses fine and activates <strong>zero</strong> rules. It produces the same scan as no skill at all, which is exactly the failure the article describes: advice that can't be executed can't catch anything.</p>
+
+  <h2>The five rules</h2>
+  <div class="matrix-scroll"><table>
+    <tr><th>Rule id</th><th>What it catches</th><th>Render cost in the simulator</th></tr>
+    <tr><td><code>unstable-key</code></td><td>List keyed by <code>index</code> (or missing key).</td><td>On a reorder tick, every row re-renders instead of the moved one.</td></tr>
+    <tr><td><code>unstable-prop</code></td><td>Inline object/array/function prop passed to a memoized child.</td><td>The child's <code>memo</code> never skips — it re-renders every parent render.</td></tr>
+    <tr><td><code>effect-deps</code></td><td>Effect reads a value missing from its dep array.</td><td>None in the sim — this is a <em>correctness</em> finding (stale closure), proving the checklist isn't only about render counts.</td></tr>
+    <tr><td><code>derived-state</code></td><td><code>useState</code> holding a value computable during render.</td><td>+1 render pass per entry each time the component renders (render → effect → setState → render again).</td></tr>
+    <tr><td><code>unstable-context</code></td><td>Provider <code>value</code> built inline each render.</td><td>Every consumer in the subtree re-renders on every provider render — memo or not.</td></tr>
+  </table></div>
+
+  <h2>The render simulator</h2>
+  <p>Each tick, the root's state changes and it renders. A child re-renders when: it's not memoized; a prop is an inline literal (new reference); it's a reorder tick and a prop reference changed; or it consumes a context whose provider emitted an inline value. <code>checkout</code> seeds all five anti-patterns; <code>checkout-fixed</code> is the same topology with the checklist applied. Run <code>npm run report</code> for the side-by-side: 68 renders vs. 14 — the ~80% the source post advertises, shown as a consequence of the checklist rather than a promise.</p>
+
+  <h2>The honest edge</h2>
+  <p><code>clean-but-broken</code> scans clean under the full skill — and carries a duplicated source of truth (its <code>designNote</code>). Zero findings, real bug. A render checklist reviews <em>patterns</em>; it does not review whether the design was right. Reviewer-bot, not architect.</p>
+
+  <h2>Honest limits</h2>
+  <ul>
+    <li>Component trees are JSON descriptors, not JSX — detection is by declared attributes, not AST analysis. A real review skill operates on code text with all its ambiguity.</li>
+    <li>The simulator encodes simplified propagation rules, not React internals — no batching, no transitions, no concurrent scheduling.</li>
+    <li>The 80% figure is fixture-specific <em>by design</em>: it demonstrates that "fewer renders" is measurable, not that every codebase contains it.</li>
+    <li><code>effect-deps</code> is counted as a finding but costs no renders in the sim — real stale closures cost correctness, which is worse.</li>
+  </ul>
+
+  <footer><p class="muted">Companion to the article <em>A React Skill Isn't a Prompt — It's a Senior Reviewer You Can Run</em>.</p></footer>
+</main>
+<!-- pb-shell --><a class="pb-shell" href="https://github.com/anhquanbd2021/9-skill-react-best-practices--" title="9-skill-react-best-practices-- — an Article Playbook demo (view source)"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="2" y="2" width="9" height="9" rx="2" fill="#2dd4bf"/><rect x="13" y="2" width="9" height="9" rx="2" fill="#2dd4bf" opacity=".45"/><rect x="2" y="13" width="9" height="9" rx="2" fill="#2dd4bf" opacity=".45"/><rect x="13" y="13" width="9" height="9" rx="4.5" fill="#2dd4bf"/></svg><b>9-skill-react-best-practices--</b><i>DEMO</i></a><!-- pb-shell --><!-- pb-back --><a class="pb-back" id="pb-back" href="https://github.com/anhquanbd2021/9-skill-react-best-practices--" title="Back to the article — 9-skill-react-best-practices--">← Article <i>PLAYBOOK</i></a><script>(function(){var a=document.getElementById('pb-back');if(!a)return;var h=location.hostname;if(/^(localhost|127\.0\.0\.1|192\.168\.|10\.|172\.(1[6-9]|2[0-9]|3[01])\.)/.test(h)){a.href='//'+h+':'+(/^(localhost|127\.0\.0\.1)$/.test(h)?'1234':'30082')+'/microsites/article.html?slug=9-skill-react-best-practices--';}})();</script><!-- pb-back --></body>
+</html>

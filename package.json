@@ -1,0 +1,16 @@
+{
+  "name": "9-skill-react-best-practices-demo",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Render Inspector — scan a seeded React component tree with a domain skill's checklist and measure the renders each anti-pattern costs.",
+  "scripts": {
+    "start": "node app/server.js",
+    "report": "node scripts/report.mjs",
+    "test": "node --test \"test/*.test.mjs\"",
+    "check": "npm test && npm run report"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
